@@ -2,25 +2,29 @@
 
 import hashlib
 import hmac
-import requests
 import time
 from operator import itemgetter
-from .helpers import date_to_milliseconds, interval_to_milliseconds
+
+import requests
+
 from .exceptions import BinanceAPIException, BinanceRequestException, BinanceWithdrawException
+from .helpers import date_to_milliseconds, interval_to_milliseconds
 
 
 class Client(object):
-
     API_URL = 'https://api.binance.{}/api'
     WITHDRAW_API_URL = 'https://api.binance.{}/wapi'
     MARGIN_API_URL = 'https://api.binance.{}/sapi'
     WEBSITE_URL = 'https://www.binance.{}'
     FUTURES_URL = 'https://fapi.binance.{}/fapi'
+    DELIVERY_URL = 'https://dapi.binance.{}/dapi'
+    TEST_FUTURES_URL = 'https://testnet.binancefuture.com'
     PUBLIC_API_VERSION = 'v1'
     PRIVATE_API_VERSION = 'v3'
     WITHDRAW_API_VERSION = 'v3'
     MARGIN_API_VERSION = 'v1'
     FUTURES_API_VERSION = 'v1'
+    DELIVERY_API_VERSION = 'v1'
 
     SYMBOL_TYPE_SPOT = 'SPOT'
 
@@ -77,7 +81,7 @@ class Client(object):
     AGG_BUYER_MAKES = 'm'
     AGG_BEST_MATCH = 'M'
 
-    def __init__(self, api_key=None, api_secret=None, requests_params=None, tld='com'):
+    def __init__(self, api_key=None, api_secret=None, requests_params=None, tld='com', test=False):
         """Binance API Client constructor
 
         :param api_key: Api Key
@@ -93,7 +97,8 @@ class Client(object):
         self.WITHDRAW_API_URL = self.WITHDRAW_API_URL.format(tld)
         self.MARGIN_API_URL = self.MARGIN_API_URL.format(tld)
         self.WEBSITE_URL = self.WEBSITE_URL.format(tld)
-        self.FUTURES_URL = self.FUTURES_URL.format(tld)
+        self.FUTURES_URL = self.TEST_FUTURES_URL + '/fapi' if test else self.FUTURES_URL.format(tld)
+        self.DELIVERY_URL = self.TEST_FUTURES_URL + '/dapi' if test else self.DELIVERY_URL.format(tld)
 
         self.API_KEY = api_key
         self.API_SECRET = api_secret
@@ -127,6 +132,9 @@ class Client(object):
 
     def _create_futures_api_uri(self, path):
         return self.FUTURES_URL + '/' + self.FUTURES_API_VERSION + '/' + path
+
+    def _create_delivery_api_uri(self, path):
+        return self.DELIVERY_URL + '/' + self.DELIVERY_API_VERSION + '/' + path
 
     def _generate_signature(self, data):
 
@@ -172,7 +180,7 @@ class Client(object):
             if 'requests_params' in kwargs['data']:
                 # merge requests params into kwargs
                 kwargs.update(kwargs['data']['requests_params'])
-                del(kwargs['data']['requests_params'])
+                del (kwargs['data']['requests_params'])
 
         if signed:
             # generate signature
@@ -191,7 +199,7 @@ class Client(object):
         # if get request assign data array to params value for requests lib
         if data and (method == 'get' or force_params):
             kwargs['params'] = '&'.join('%s=%s' % (data[0], data[1]) for data in kwargs['data'])
-            del(kwargs['data'])
+            del (kwargs['data'])
 
         self.response = getattr(self.session, method)(uri, **kwargs)
         return self._handle_response()
@@ -218,6 +226,11 @@ class Client(object):
 
     def _request_futures_api(self, method, path, signed=False, **kwargs):
         uri = self._create_futures_api_uri(path)
+
+        return self._request(method, uri, signed, True, **kwargs)
+
+    def _request_delivery_api(self, method, path, signed=False, **kwargs):
+        uri = self._create_delivery_api_uri(path)
 
         return self._request(method, uri, signed, True, **kwargs)
 
@@ -2695,7 +2708,6 @@ class Client(object):
         """
         return self._request_margin_api('post', 'margin/isolated/create', signed=True, data=params)
 
-
     def get_isolated_margin_symbol(self, **params):
         """Query isolated margin symbol info
 
@@ -2904,7 +2916,6 @@ class Client(object):
         """
         params['type'] = 1
         return self._request_margin_api('post', 'margin/transfer', signed=True, data=params)
-
 
     def transfer_isolated_margin_to_spot(self, **params):
         """Execute transfer between isolated margin account and spot account.
@@ -3979,7 +3990,7 @@ class Client(object):
 
         """
         return self._request_withdraw_api('post', 'sub-account/transfer.html', True, data=params)
-    
+
     def get_sub_account_futures_transfer_history(self, **params):
         """Query Sub-account Futures Transfer History.
 
@@ -5100,3 +5111,116 @@ class Client(object):
         
         """
         return self._request_futures_api('get', 'positionSide/dual', True, data=params)
+
+    # delivery API
+    def delivery_ticker(self, **params):
+        """24 hour rolling window price change statistics.
+
+        https://binance-docs.github.io/apidocs/delivery/en/#24hr-ticker-price-change-statistics-market_data
+
+        """
+        return self._request_delivery_api('get', 'ticker/24hr', data=params)
+
+    def delivery_symbol_ticker(self, **params):
+        """Latest price for a symbol or symbols.
+
+        https://binance-docs.github.io/apidocs/delivery/en/#symbol-price-ticker-market_data
+
+        """
+        return self._request_delivery_api('get', 'ticker/price', data=params)
+
+    def delivery_orderbook_ticker(self, **params):
+        """Best price/qty on the order book for a symbol or symbols.
+
+        https://binance-docs.github.io/apidocs/delivery/en/#symbol-order-book-ticker-market_data
+
+        """
+        return self._request_delivery_api('get', 'ticker/bookTicker', data=params)
+
+    def delivery_account(self, **params):
+        """Get current account information.
+
+        https://binance-docs.github.io/apidocs/delivery/en/#account-information-user_data
+
+        """
+        return self._request_delivery_api('get', 'account', True, data=params)
+
+    def delivery_position_information(self, **params):
+        """Get position information
+
+        https://binance-docs.github.io/apidocs/delivery/en/#position-information-user_data
+
+        """
+        return self._request_delivery_api('get', 'positionRisk', True, data=params)
+
+    def delivery_change_leverage(self, **params):
+        """Change user's initial leverage of specific symbol market
+
+        https://binance-docs.github.io/apidocs/delivery/en/#change-initial-leverage-trade
+
+        """
+        return self._request_delivery_api('post', 'leverage', True, data=params)
+
+    def delivery_create_order(self, **params):
+        """Send in a new order.
+
+        https://binance-docs.github.io/apidocs/delivery/en/#new-order-trade
+
+        """
+        return self._request_delivery_api('post', 'order', True, data=params)
+
+    def delivery_get_order(self, **params):
+        """Check an order's status.
+
+        https://binance-docs.github.io/apidocs/delivery/en/#query-order-user_data
+
+        """
+        return self._request_delivery_api('get', 'order', True, data=params)
+
+    def delivery_get_open_orders(self, **params):
+        """Get all open orders on a symbol.
+
+        https://binance-docs.github.io/apidocs/delivery/en/#current-open-orders-user_data
+
+        """
+        return self._request_delivery_api('get', 'openOrders', True, data=params)
+
+    def delivery_get_all_orders(self, **params):
+        """Get all account orders; active, canceled, or filled.
+
+        https://binance-docs.github.io/apidocs/delivery/en/#all-orders-user_data
+
+        """
+        return self._request_delivery_api('get', 'allOrders', True, data=params)
+
+    def delivery_cancel_order(self, **params):
+        """Cancel an active delivery order.
+
+        https://binance-docs.github.io/apidocs/delivery/en/#cancel-order-trade
+
+        """
+        return self._request_delivery_api('delete', 'order', True, data=params)
+
+    def delivery_cancel_all_open_orders(self, **params):
+        """Cancel all open delivery orders
+
+        https://binance-docs.github.io/apidocs/delivery/en/#cancel-all-open-orders-trade
+
+        """
+        return self._request_delivery_api('delete', 'allOpenOrders', True, data=params)
+
+    def delivery_cancel_orders(self, **params):
+        """Cancel multiple delivery orders
+
+        https://binance-docs.github.io/apidocs/delivery/en/#cancel-multiple-orders-trade
+
+        """
+        return self._request_delivery_api('delete', 'batchOrders', True, data=params)
+
+    def delivery_account_balance(self, **params):
+        """Get delivery account balance
+
+        https://binance-docs.github.io/apidocs/delivery/en/#future-account-balance-user_data
+
+        """
+        return self._request_delivery_api('get', 'balance', True, data=params)
