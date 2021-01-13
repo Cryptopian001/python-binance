@@ -8,3 +8,4 @@ python_binance.egg-info/
 .idea
 venv
 secret*
+*.egg-info

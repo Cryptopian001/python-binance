@@ -4734,7 +4734,7 @@ class Client(object):
         """
         return self._request_margin_api('get', 'sub-account/transfer/subUserHistory', True, data=params)
 
-    def make_universal_transfer(self, **params):
+    def make_subaccount_universal_transfer(self, **params):
         """Universal Transfer (For Master Account)
 
         https://binance-docs.github.io/apidocs/spot/en/#universal-transfer-for-master-account
@@ -4767,7 +4767,7 @@ class Client(object):
         """
         return self._request_margin_api('post', 'sub-account/universalTransfer', True, data=params)
 
-    def get_universal_transfer_history(self, **params):
+    def get_subaccount_universal_transfer_history(self, **params):
         """Universal Transfer (For Master Account)
 
         https://binance-docs.github.io/apidocs/spot/en/#query-universal-transfer-history
