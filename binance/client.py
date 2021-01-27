@@ -155,6 +155,9 @@ class Client(object):
         for key, value in data.items():
             if key == 'signature':
                 has_signature = True
+            elif type(value) is list:
+                for val in value:
+                    params.append((key, val))
             else:
                 params.append((key, value))
         # sort parameters by key
