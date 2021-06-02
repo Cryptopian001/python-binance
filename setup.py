@@ -2,7 +2,7 @@ from setuptools import setup
 
 setup(
     name='cp-binance',
-    version='1.0.1',
+    version='1.0.2',
     packages=['binance'],
     description='Binance REST API python implementation',
     url='https://github.com/sammchardy/python-binance',

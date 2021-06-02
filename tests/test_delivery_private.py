@@ -1,12 +1,7 @@
-import json
 import os
 
 from binance.client import Client
-
-
-def load_json_config(json_config_file_path: str, encoding: str = 'utf-8') -> dict:
-    with open(json_config_file_path, encoding=encoding) as f:
-        return json.load(f)
+from tests.utils import load_json_config
 
 
 class TestDelivery:
@@ -26,7 +21,7 @@ class TestDelivery:
         position = self.test_client.delivery_position_information()
         print(position)
 
-    def test_create_trade(self):
+    def test_create_order(self):
         order_res = self.test_client.delivery_create_order(symbol='BTCUSD_210625',
                                                            type='MARKET',
                                                            positionSide='LONG',

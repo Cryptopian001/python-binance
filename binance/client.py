@@ -261,21 +261,6 @@ class Client(object):
     def _delete(self, path, signed=False, version=PUBLIC_API_VERSION, **kwargs):
         return self._request_api('delete', path, signed, version, **kwargs)
 
-    # Exchange Endpoints
-
-    def get_products(self):
-        """Return list of products currently listed on Binance
-
-        Use get_exchange_info() call instead
-
-        :returns: list - List of product dictionaries
-
-        :raises: BinanceRequestException, BinanceAPIException
-
-        """
-        products = self._request_website('get', 'exchange-api/v1/public/asset-service/product/get-products')
-        return products
-
     def get_exchange_info(self):
         """Return rate limits and list of symbols
 
@@ -4979,6 +4964,14 @@ class Client(object):
         """
         return self._request_futures_api('post', 'order', True, data=params)
 
+    def futures_create_batch_orders(self, **params):
+        """Send in a new order.
+
+        https://binance-docs.github.io/apidocs/futures/en/#new-order-trade
+
+        """
+        return self._request_futures_api('post', 'batchOrders', True, data=params)
+
     def futures_get_order(self, **params):
         """Check an order's status.
 
@@ -5114,6 +5107,18 @@ class Client(object):
         
         """
         return self._request_futures_api('get', 'positionSide/dual', True, data=params)
+
+    def futures_change_multi_assets_margin_mode(self, **params):
+        """Change user's Multi-Assets mode (Multi-Assets Mode or Single-Asset Mode) on Every symbol
+        https://binance-docs.github.io/apidocs/futures/en/#change-multi-assets-mode-trade
+        """
+        return self._request_futures_api('post', 'multiAssetsMargin', True, data=params)
+
+    def futures_get_multi_assets_margin_mode(self, **params):
+        """Get user's Multi-Assets mode (Multi-Assets Mode or Single-Asset Mode) on Every symbol
+        https://binance-docs.github.io/apidocs/futures/en/#get-current-multi-assets-mode-user_data
+        """
+        return self._request_futures_api('get', 'multiAssetsMargin', True, data=params)
 
     # delivery API
     def delivery_ticker(self, **params):
