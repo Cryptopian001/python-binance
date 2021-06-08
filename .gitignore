@@ -5,5 +5,7 @@ binance/__pycache__/
 build/
 dist/
 python_binance.egg-info/
-.idea
-venv
+*__pycache__
+*.egg-info/
+.idea/
+venv*/
