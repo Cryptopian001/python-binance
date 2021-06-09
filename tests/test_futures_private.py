@@ -53,5 +53,6 @@ class TestFutures:
         print('NEW BATCH ORDERS', order_res)
         open_orders = self.test_client.futures_get_open_orders(symbol=symbol)
         assert len(open_orders) == 2
-        origOrderIdList
-        print('CANCEL BATCH ORDER', self.test_client.futures_cancel_orders(symbol=symbol, orderId=order_res['orderId']))
+        order_id_list = [order['orderId'] for order in open_orders]
+        print('CANCEL BATCH ORDER',
+              self.test_client.futures_cancel_orders(symbol=symbol, orderIdList=order_id_list))

@@ -1,3 +1,4 @@
+import urllib.parse
 from typing import Dict, Optional, List, Tuple
 
 import aiohttp
@@ -7,10 +8,9 @@ import hmac
 import requests
 import time
 from operator import itemgetter
-from urllib.parse import urlencode
+from urllib.parse import urlencode, quote_plus
 
-
-from .helpers import interval_to_milliseconds, convert_ts_str
+from .helpers import interval_to_milliseconds, convert_ts_str, encode_params
 from .exceptions import BinanceAPIException, BinanceRequestException, NotImplementedException
 from .enums import HistoricalKlinesType
 
@@ -237,6 +237,9 @@ class BaseClient:
         for key, value in data.items():
             if key == 'signature':
                 has_signature = True
+            elif type(value) is list:
+                for val in value:
+                    params.append((key, val))
             else:
                 params.append((key, str(value)))
         # sort parameters by key
@@ -5313,9 +5316,7 @@ class Client(BaseClient):
         the url encoding is done on the special query param, batchOrders, in the early stage.
 
         """
-        query_string = urlencode(params)
-        query_string = query_string.replace('%27', '%22')
-        params['batchOrders'] = query_string[12:]
+        encode_params(params, 'batchOrders')
         return self._request_futures_api('post', 'batchOrders', True, data=params)
 
     def futures_get_order(self, **params):
@@ -5364,6 +5365,10 @@ class Client(BaseClient):
         https://binance-docs.github.io/apidocs/futures/en/#cancel-multiple-orders-trade
 
         """
+        if 'orderIdList' in params:
+            encode_params(params, 'orderIdList')
+        if 'origClientOrderIdList' in params:
+            encode_params(params, 'origClientOrderIdList')
         return self._request_futures_api('delete', 'batchOrders', True, data=params)
 
     def futures_account_balance(self, **params):
@@ -5688,10 +5693,7 @@ class Client(BaseClient):
         the url encoding is done on the special query param, batchOrders, in the early stage.
 
         """
-        query_string = urlencode(params)
-        query_string = query_string.replace('%27', '%22')
-        params['batchOrders'] = query_string[12:]
-
+        encode_params(params, 'batchOrders')
         return self._request_futures_coin_api('post', 'batchOrders', True, data=params)
 
     def futures_coin_get_order(self, **params):
@@ -5746,9 +5748,11 @@ class Client(BaseClient):
         https://binance-docs.github.io/apidocs/delivery/en/#cancel-multiple-orders-trade
 
         """
-        return self._request_futures_coin_api(
-            "delete", "batchOrders", True, data=params
-        )
+        if 'orderIdList' in params:
+            encode_params(params, 'orderIdList')
+        if 'origClientOrderIdList' in params:
+            encode_params(params, 'origClientOrderIdList')
+        return self._request_futures_coin_api("delete", "batchOrders", True, data=params)
 
     def futures_coin_account_balance(self, **params):
         """Get futures account balance
@@ -7358,9 +7362,7 @@ class AsyncClient(BaseClient):
         return await self._request_futures_api('post', 'order', True, data=params)
 
     async def futures_place_batch_order(self, **params):
-        query_string = urlencode(params)
-        query_string = query_string.replace('%27', '%22')
-        params['batchOrders'] = query_string[12:]
+        encode_params(params, 'batchOrders')
         return await self._request_futures_api('post', 'batchOrders', True, data=params)
 
     async def futures_get_order(self, **params):
@@ -7379,6 +7381,10 @@ class AsyncClient(BaseClient):
         return await self._request_futures_api('delete', 'allOpenOrders', True, data=params)
 
     async def futures_cancel_orders(self, **params):
+        if 'orderIdList' in params:
+            encode_params(params, 'orderIdList')
+        if 'origClientOrderIdList' in params:
+            encode_params(params, 'origClientOrderIdList')
         return await self._request_futures_api('delete', 'batchOrders', True, data=params)
 
     async def futures_account_balance(self, **params):
@@ -7422,6 +7428,9 @@ class AsyncClient(BaseClient):
 
     async def futures_get_multi_assets_mode(self):
         return await self._request_futures_api('get', 'multiAssetsMargin', True)
+
+    async def futures_commission_rate(self):
+        return await self._request_futures_api('get', 'commissionRate', True)
 
     async def futures_stream_get_listen_key(self):
         res = await self._request_futures_api('post', 'listenKey', signed=False, data={})
@@ -7515,10 +7524,7 @@ class AsyncClient(BaseClient):
         return await self._request_futures_coin_api("post", "order", True, data=params)
 
     async def futures_coin_place_batch_order(self, **params):
-        query_string = urlencode(params)
-        query_string = query_string.replace('%27', '%22')
-        params['batchOrders'] = query_string[12:]
-
+        encode_params(params, 'batchOrders')
         return await self._request_futures_coin_api('post', 'batchOrders', True, data=params)
 
     async def futures_coin_get_order(self, **params):
@@ -7543,9 +7549,11 @@ class AsyncClient(BaseClient):
         )
 
     async def futures_coin_cancel_orders(self, **params):
-        return await self._request_futures_coin_api(
-            "delete", "batchOrders", True, data=params
-        )
+        if 'orderIdList' in params:
+            encode_params(params, 'orderIdList')
+        if 'origClientOrderIdList' in params:
+            encode_params(params, 'origClientOrderIdList')
+        return await self._request_futures_coin_api("delete", "batchOrders", True, data=params)
 
     async def futures_coin_account_balance(self, **params):
         return await self._request_futures_coin_api(

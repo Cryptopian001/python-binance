@@ -1,5 +1,6 @@
 from decimal import Decimal
 from typing import Union, Optional, Dict
+from urllib.parse import urlencode
 
 import dateparser
 import math
@@ -70,3 +71,9 @@ def convert_ts_str(ts_str):
     if type(ts_str) == int:
         return ts_str
     return date_to_milliseconds(ts_str)
+
+
+def encode_params(params, key):
+    query_string = urlencode({key: params[key]})
+    query_string = query_string.replace('%27', '%22')
+    params[key] = query_string[len(key) + 1:]
