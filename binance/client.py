@@ -5478,6 +5478,14 @@ class Client(BaseClient):
         """
         return self._request_futures_api('get', 'multiAssetsMargin', True)
 
+    def futures_commission_rate(self, **params):
+        """User Commission Rate
+
+        https://binance-docs.github.io/apidocs/futures/en/#user-commission-rate-user_data
+
+        """
+        return self._request_futures_api('get', 'commissionRate', True, data=params)
+
     def futures_stream_get_listen_key(self):
         res = self._request_futures_api('post', 'listenKey', signed=False, data={})
         return res['listenKey']

@@ -56,3 +56,7 @@ class TestFutures:
         order_id_list = [order['orderId'] for order in open_orders]
         print('CANCEL BATCH ORDER',
               self.test_client.futures_cancel_orders(symbol=symbol, orderIdList=order_id_list))
+
+    def test_commission_rate(self):
+        commission = self.test_client.futures_commission_rate(symbol='BTCUSDT')
+        print(commission)
