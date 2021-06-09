@@ -5476,7 +5476,7 @@ class Client(BaseClient):
         https://binance-docs.github.io/apidocs/futures/en/#get-current-multi-assets-mode-user_data
 
         """
-        return self._request_futures_api('get', 'multiAssetsMargin', True)
+        return self._request_futures_api('get', 'multiAssetsMargin', True, data={})
 
     def futures_commission_rate(self, **params):
         """User Commission Rate

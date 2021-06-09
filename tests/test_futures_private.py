@@ -60,3 +60,7 @@ class TestFutures:
     def test_commission_rate(self):
         commission = self.test_client.futures_commission_rate(symbol='BTCUSDT')
         print(commission)
+
+    def test_futures_get_multi_assets_mode(self):
+        mode = self.test_client.futures_get_multi_assets_mode()
+        print(mode)
