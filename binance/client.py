@@ -5034,7 +5034,7 @@ class Client(BaseClient):
         """
         return self._request_margin_api('post', 'sub-account/universalTransfer', True, data=params)
 
-    def get_universal_transfer_history(self, **params):
+    def get_subaccount_universal_transfer_history(self, **params):
         """Universal Transfer (For Master Account)
 
         https://binance-docs.github.io/apidocs/spot/en/#query-universal-transfer-history
@@ -7280,7 +7280,7 @@ class AsyncClient(BaseClient):
     async def make_subaccount_universal_transfer(self, **params):
         return await self._request_margin_api('post', 'sub-account/universalTransfer', True, data=params)
 
-    async def get_universal_transfer_history(self, **params):
+    async def get_subaccount_universal_transfer_history(self, **params):
         return await self._request_margin_api('get', 'sub-account/universalTransfer', True, data=params)
 
     # Futures API

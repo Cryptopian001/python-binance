@@ -21,7 +21,7 @@ with open("README.rst", "r") as fh:
 
 setup(
     name='cp-binance',
-    version='1.0.2',
+    version='1.1.0',
     packages=['binance'],
     description='Binance REST API python implementation',
     long_description=long_description,
