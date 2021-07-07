@@ -3882,6 +3882,40 @@ class Client(BaseClient):
         """
         return self._request_margin_api('get', 'margin/maxTransferable', signed=True, data=params)
 
+    def get_margin_interest_history(self, **params):
+        """Get Interest History
+
+        https://binance-docs.github.io/apidocs/spot/en/#get-interest-history-user_data
+
+        :param asset: str
+        :param isolatedSymbol: str
+        :param startTime: long
+        :param endTime: long
+        :param current: long        Currently querying page. Start from 1. Default:1
+        :param size: long           Default:10 Max:100
+        :param archived: str        Default: false. Set to true for archived data from 6 months ago
+        :param recvWindow: long     the number of milliseconds the request is valid for
+        :return:
+        """
+        return self._request_margin_api('get', 'margin/interestHistory', signed=True, data=params)
+
+    def get_margin_interest_rate_history(self, **params):
+        """Get Interest History
+
+        https://binance-docs.github.io/apidocs/spot/en/#query-margin-interest-rate-history-user_data
+
+        :param asset: str:          requried
+        :param vipLevel: str
+        :param startTime: long      Default: 7 days ago
+        :param endTime: long        Default: present. Maximum range: 3 months.
+        :param limit: int           Default: 20. Maximum: 100
+        :param recvWindow: long     the number of milliseconds the request is valid for
+        :return:
+        """
+        return self._request_margin_api('get', 'margin/interestRateHistory', signed=True, data=params)
+
+
+
     # Cross-margin
 
     def margin_stream_get_listen_key(self):
