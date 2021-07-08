@@ -7179,6 +7179,13 @@ class AsyncClient(BaseClient):
     async def get_max_margin_transfer(self, **params):
         return await self._request_margin_api('get', 'margin/maxTransferable', signed=True, data=params)
 
+    async def get_margin_interest_history(self, **params):
+        return await self._request_margin_api('get', 'margin/interestHistory', signed=True, data=params)
+
+    async def get_margin_interest_rate_history(self, **params):
+        return await self._request_margin_api('get', 'margin/interestRateHistory', signed=True, data=params)
+
+
     # Cross-margin
 
     async def margin_stream_get_listen_key(self):
